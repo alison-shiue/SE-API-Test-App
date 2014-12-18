@@ -42,6 +42,12 @@ var SETest = {
   },
 
   init: function () {
+    if (!window.navigator.seManager) {
+      recordLogs("logs3", "SecureElement API is not present");
+      updateResultStatus("result3", "Red", "Fail");
+      return;
+    }
+
     this.test31Button.addEventListener('click', this.test31Case.bind(this));
     this.reset31Button.addEventListener('click', this.reset31Case.bind(this));
     this.test32Button.addEventListener('click', this.test32Case.bind(this));
@@ -67,34 +73,28 @@ var SETest = {
   test31Case: function() {
     recordLogs("logs3-1", "Start testing ...");
     this.test31Button.disabled = true;
-    if (!window.navigator.seManager) {
-      recordLogs("logs3-1", "SecureElement API is not present");
-      updateResultStatus("result3-1", "Red", "Fail");
-    }
-    else {
-      recordLogs("logs3-1", "Get SEReaders");
-      window.navigator.seManager.getSEReaders()
-      .then((readers) => {
-        window.reader = readers[0];
-        recordLogs("logs3-1", "Open one session");
-        return readers[0].openSession();
-      })
-      .then((session) => {
-        recordLogs("logs3-1", "Check if reader object from session instance is equal to reader instance");
-        if (window.reader != session.reader) { 
-          updateResultStatus("result3-1", "Red", "Fail");
-        }
-        else {
-          updateResultStatus("result3-1", "Green", "Pass");
-        }
-        window.reader.closeAll();
-      })
-      .catch((err) => {
-        recordLogs("logs3-1", "error:" + err);
+
+    recordLogs("logs3-1", "Get SEReaders");
+    window.navigator.seManager.getSEReaders()
+    .then((readers) => {
+      window.reader = readers[0];
+      recordLogs("logs3-1", "Open one session");
+      return readers[0].openSession();
+    })
+    .then((session) => {
+      recordLogs("logs3-1", "Check if reader object from session instance is equal to reader instance");
+      if (window.reader != session.reader) {
         updateResultStatus("result3-1", "Red", "Fail");
-        window.reader.closeAll();
-      });
-    }
+      } else {
+        updateResultStatus("result3-1", "Green", "Pass");
+      }
+      window.reader.closeAll();
+    })
+    .catch((err) => {
+      recordLogs("logs3-1", "error:" + err.name);
+      updateResultStatus("result3-1", "Red", "Fail");
+      window.reader.closeAll();
+    });
   },
 
   reset31Case: function() {
@@ -107,34 +107,28 @@ var SETest = {
   test32Case: function() {
     recordLogs("logs3-2", "Start testing ...");
     this.test32Button.disabled = true;
-    if (!window.navigator.seManager) {
-      recordLogs("logs3-2", "SecureElement API is not present");
-      updateResultStatus("result3-2", "Red", "Fail");
-    }
-    else {
-      recordLogs("logs3-2", "Get SEReaders");
-      window.navigator.seManager.getSEReaders()
-      .then((readers) => {
-        window.reader = readers[0];
-        recordLogs("logs3-2", "Open one session");
-        return readers[0].openSession();
-      })
-      .then((session) => {
-        recordLogs("logs3-2", "Check open session status");
-        if (session.isClosed == false) {
-          updateResultStatus("result3-2", "Green", "Pass");
-        }
-        else {
-          updateResultStatus("result3-2", "Red", "Fail");
-        }
-        window.reader.closeAll();
-      })
-      .catch((err) => {
-        recordLogs("logs3-2", "error:" + err);
+
+    recordLogs("logs3-2", "Get SEReaders");
+    window.navigator.seManager.getSEReaders()
+    .then((readers) => {
+      window.reader = readers[0];
+      recordLogs("logs3-2", "Open one session");
+      return readers[0].openSession();
+    })
+    .then((session) => {
+      recordLogs("logs3-2", "Check open session status");
+      if (session.isClosed) {
         updateResultStatus("result3-2", "Red", "Fail");
-        window.reader.closeAll();
-      });
-    }
+      } else {
+        updateResultStatus("result3-2", "Green", "Pass");
+      }
+      window.reader.closeAll();
+    })
+    .catch((err) => {
+      recordLogs("logs3-2", "error:" + err.name);
+      updateResultStatus("result3-2", "Red", "Fail");
+      window.reader.closeAll();
+    });
   },
 
   reset32Case: function() {
@@ -143,36 +137,31 @@ var SETest = {
     clearLogs("logs3-2");
   },
 
-  // Test #3-3 
+  // Test #3-3
   test33Case: function() {
     recordLogs("logs3-3", "Start testing ...");
     this.test33Button.disabled = true;
-    if (!window.navigator.seManager) {
-      recordLogs("logs3-3", "SecureElement API is not present");
+
+    recordLogs("logs3-3", "Get SEReaders");
+    window.navigator.seManager.getSEReaders()
+    .then((readers) => {
+      window.reader = readers[0];
+      recordLogs("logs3-3", "Open one session");
+      return readers[0].openSession();
+    })
+    .then((session) => {
+      recordLogs("logs3-3", "Open one logical channel to CRS applet ...");
+      return session.openLogicalChannel(hexString2byte(window.AID.CRS));
+    })
+    .then((channel) => {
+      updateResultStatus("result3-3", "Green", "Pass");
+      window.reader.closeAll();
+    })
+    .catch((err) => {
+      recordLogs("logs3-3", "error:" + err.name);
       updateResultStatus("result3-3", "Red", "Fail");
-    }
-    else {
-      recordLogs("logs3-3", "Get SEReaders");
-      window.navigator.seManager.getSEReaders()
-      .then((readers) => {
-        window.reader = readers[0];
-        recordLogs("logs3-3", "Open one session");
-        return readers[0].openSession();
-      })
-      .then((session) => {
-        recordLogs("logs3-3", "Open one logical channel to CRS applet ...");
-        return session.openLogicalChannel(hexString2byte(window.AID.CRS));
-      })
-      .then((channel) => {
-        updateResultStatus("result3-3", "Green", "Pass");
-        window.reader.closeAll();
-      })
-      .catch((err) => {
-        recordLogs("logs3-3", "error:" + err); 
-        updateResultStatus("result3-3", "Red", "Fail");
-        window.reader.closeAll();
-      });
-    }
+      window.reader.closeAll();
+    });
   },
 
   reset33Case: function() {
@@ -185,39 +174,35 @@ var SETest = {
   test34Case: function() {
     recordLogs("logs3-4", "Start testing ...");
     this.test34Button.disabled = true;
-    if (!window.navigator.seManager) {
-      recordLogs("logs3-4", "SecureElement API is not present");
+
+    recordLogs("logs3-4", "Get SEReaders");
+    window.navigator.seManager.getSEReaders()
+    .then((readers) => {
+      window.reader = readers[0];
+      recordLogs("logs3-4", "Open one session");
+      return readers[0].openSession();
+    })
+    .then((session) => {
+      recordLogs("logs3-4", "Open one logical channel to an illegal applet (length of AID is less than 5)");
+      return session.openLogicalChannel(hexString2byte(window.AID.AID_Illegal_1));
+    })
+    .then((channel) => {
+      recordLogs("logs3-4", "Do not catch an error");
       updateResultStatus("result3-4", "Red", "Fail");
-    }
-    else {
-      recordLogs("logs3-4", "Get SEReaders");
-      window.navigator.seManager.getSEReaders()
-      .then((readers) => {
-        window.reader = readers[0];
-        recordLogs("logs3-4", "Open one session");
-        return readers[0].openSession();
-      })
-      .then((session) => {
-        recordLogs("logs3-4", "Open one logical channel to an illegal applet (length of AID is less than 5)");
-        return session.openLogicalChannel(hexString2byte(window.AID.AID_Illegal_1));
-      })
-      .then((channel) => {
-        recordLogs("logs3-4", "Do not catch an error");
+      window.reader.closeAll();
+    })
+    .catch((err) => {
+      recordLogs("logs3-4", "error:" + err.name);
+      // TODO should be some SEInvalodAIDError.
+      if (err.name == "SEInvalidChannelError") {
+        updateResultStatus("result3-4", "Green", "Pass");
+      }
+      else {
+        recordLogs("logs3-4", "Incorrect error type");
         updateResultStatus("result3-4", "Red", "Fail");
-        window.reader.closeAll();
-      })
-      .catch((err) => {
-        recordLogs("logs3-4", "error:" + err);
-        if (err.name == "SEInvalidChannelError") {
-          updateResultStatus("result3-4", "Green", "Pass");
-        }
-        else {
-          recordLogs("logs3-4", "Incorrect error type");
-          updateResultStatus("result3-4", "Red", "Fail");
-        }
-        window.reader.closeAll();
-      });
-    }
+      }
+      window.reader.closeAll();
+    });
   },
 
   reset34Case: function() {
@@ -225,7 +210,6 @@ var SETest = {
     updateResultStatus("result3-4", "Black", "None");
     clearLogs("logs3-4");
   },
-
 };
 
 window.addEventListener('load', SETest.init.bind(SETest));
